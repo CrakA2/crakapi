@@ -91,6 +91,8 @@ document
   
     const copyIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     copyIcon.setAttribute("viewBox", "0 0 101 110");
+    copyIcon.setAttribute("width", "20px"); 
+    copyIcon.setAttribute("height", "20px"); 
     copyIcon.classList.add("copy-icon");
   
     const copyPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
