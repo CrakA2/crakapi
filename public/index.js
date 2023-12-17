@@ -9,7 +9,7 @@ document
     const loadingDiv = document.getElementById("loading");
     loadingDiv.style.display = "flex"; 
 
-    const fetchPromise = fetch(`http://localhost:3000/v1/account/${username}/${tag}?fs=json`)
+    const fetchPromise = fetch(`https://tame-yak-gear.cyclic.app//v1/account/${username}/${tag}?fs=json`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Name or Tag not valid");
@@ -44,7 +44,7 @@ document
 
         const endpoints = ['hs', 'rr', 'lb', 'kd', 'rankRating', 'leaderboardRank', 'kda', 'headshot'];
         endpoints.forEach((endpoint) => {
-          fetch(`http://localhost:3000/v1/${endpoint}/${region}/${puuid}?fs=json`)
+          fetch(`https://tame-yak-gear.cyclic.app//v1/${endpoint}/${region}/${puuid}?fs=json`)
             .then((response) => response.json())
             .then((data) => {
               Object.keys(data).forEach((key) => {
@@ -86,7 +86,7 @@ function createDataElement(parent, labelContent, dataContent, endpoint) {
   copyButton.textContent = "Copy API Endpoint";
   copyButton.classList.add("copy-button");
   copyButton.addEventListener("click", function () {
-    navigator.clipboard.writeText(`http://localhost:3000/v1/${endpoint}`);
+    navigator.clipboard.writeText(`https://tame-yak-gear.cyclic.app//v1/${endpoint}`);
   });
   dataDiv.appendChild(copyButton);
 
