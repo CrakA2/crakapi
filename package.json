@@ -1,11 +1,17 @@
 {
   "name": "your-app-name",
   "version": "1.0.0",
-  "description": "",
+  "description": "Valorant Data parser API",
   "main": "crakapi.js",
   "scripts": {
     "start": "node crakapi.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/craka2/crakapi"
+  },
+  "author": "adarsh.citra@gmail.com",
+  "license": "MIT",
   "dependencies": {
     "axios": "^1.6.2",
     "cors": "^2.8.5",
