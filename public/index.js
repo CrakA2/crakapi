@@ -82,13 +82,15 @@ function createDataElement(parent, labelContent, dataContent, endpoint) {
   dataText.classList.add("data-text");
   dataDiv.appendChild(dataText);
 
-  const copyButton = document.createElement("button");
-  copyButton.textContent = "Copy API Endpoint";
-  copyButton.classList.add("copy-button");
-  copyButton.addEventListener("click", function () {
+  const copyLink = document.createElement("a");
+  copyLink.textContent = "Copy API Endpoint";
+  copyLink.href = "#";
+  copyLink.classList.add("copy-link");
+  copyLink.addEventListener("click", function (event) {
+    event.preventDefault();
     navigator.clipboard.writeText(`https://tame-yak-gear.cyclic.app//v1/${endpoint}`);
   });
-  dataDiv.appendChild(copyButton);
+  dataDiv.appendChild(copyLink);
 
   parent.appendChild(dataDiv);
 }
