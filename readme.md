@@ -7,6 +7,8 @@ For a GUI version, please visit [https://crakapi.cyclic.app/](https://crakapi.cy
 
 Here are the available API endpoints for direct GET requests:
 
+
+
 ### Leaderboard
 
 `https://crakapi.cyclic.app/v1/lb/:region/:puuid`
@@ -51,6 +53,22 @@ Parameters:
 Expected Response:
 - If `fs` is 'json', a JSON object with the account data. Example: `{ "account": "data" }`
 - Otherwise, the account data for the player.
+
+### Headshot
+
+`https://crakapi.cyclic.app/v1/headshot/:region/:puuid`
+
+Fetches the headshot image for a player.
+
+Parameters:
+- `region`: The region of the player.
+- `puuid`: The unique identifier of the player.
+
+Expected Response:
+- The headshot % of the player.
+
+
+
 
 ## Error Handling
 
