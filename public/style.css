@@ -4,8 +4,28 @@ body {
     overflow: hidden;
 }
 .data-div {
-    margin-bottom: 1rem;
-}
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 10px;
+  }
+  
+  .large-label {
+	flex-grow: 1;
+	margin-right: 10px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+  }
+  
+  .small-button {
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+  }
 
 .data-label {
     display: block;

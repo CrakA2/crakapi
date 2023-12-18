@@ -73,17 +73,12 @@ document
     dataDiv.classList.add("data-div");
   
     const dataLabel = document.createElement("label");
-    dataLabel.textContent = `${labelContent}:`;
-    dataLabel.classList.add("data-label");
+    dataLabel.textContent = `${labelContent}: ${endpoint}`;
+    dataLabel.classList.add("data-label", "large-label");
     dataDiv.appendChild(dataLabel);
   
-    const dataText = document.createElement("span");
-    dataText.textContent = dataContent;
-    dataText.classList.add("data-text");
-    dataDiv.appendChild(dataText);
-  
     const copyButton = document.createElement("button");
-    copyButton.classList.add("copy-button");
+    copyButton.classList.add("copy-button", "small-button");
     copyButton.addEventListener("click", function (event) {
       event.preventDefault();
       navigator.clipboard.writeText(`https://tame-yak-gear.cyclic.app//v1/${endpoint}`);
@@ -91,8 +86,8 @@ document
   
     const copyIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     copyIcon.setAttribute("viewBox", "0 0 101 110");
-    copyIcon.setAttribute("width", "20px"); 
-    copyIcon.setAttribute("height", "20px"); 
+    copyIcon.setAttribute("width", "15px"); // Set width
+    copyIcon.setAttribute("height", "15px"); // Set height
     copyIcon.classList.add("copy-icon");
   
     const copyPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
