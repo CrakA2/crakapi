@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Start Session</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+  <script>
+    // Get the region and PUUID from the URL
+    const pathParts = window.location.pathname.split('/');
+    const region = pathParts[pathParts.length - 3];
+    const puuid = pathParts[pathParts.length - 2];
+
+    // Start a new session
+    $.post(`http://127.0.0.1:3000/v1/wl/${region}/${puuid}/start`, function(data) {
+      // Store the token
+      const token = data.token;
+
+      // Send a keep-alive message every 5 minutes
+      setInterval(function() {
+        $.post(`http://127.0.0.1:3000/v1/wl/${region}/${puuid}/keepalive`, { token });
+      }, 5 * 60 * 1000);
+
+      // Call the update API every minute
+      setInterval(function() {
+        $.post(`http://127.0.0.1:3000/v1/wl/${region}/${puuid}/update`);
+      }, 60 * 1000);
+    });
+</script>
+</body>
+</html>

@@ -48,7 +48,20 @@ document
           "rr",
           "lb",
           "kd",
+          "wl",
         ];
+        createDataElement(
+          resultDiv,
+          "Win Loss Tracker (Put in OBS browser source)",
+          region,
+          `wl/${region}/${puuid}/sessiondata`
+        );
+        createDataElement(
+          resultDiv,
+          "Win Loss API Endpoint",
+          region,
+          `wl/${region}/${puuid}`
+        );
         endpoints.forEach((endpoint) => {
           fetch(
             `https://tame-yak-gear.cyclic.app//v1/${endpoint}/${region}/${puuid}?fs=json`
