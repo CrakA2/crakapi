@@ -90,7 +90,7 @@ function createDataElement(parent, labelContent, dataContent, endpoint) {
   dataInputGroup.classList.add("input-group", "row");
 
   const dataInput = document.createElement("input");
-  dataInput.value = `https://tame-yak-gear.cyclic.app/v1/${endpoint}`;
+  dataInput.value = `https://crakapi.cyclic.app/v1/${endpoint}`;
   dataInput.readOnly = true;
   dataInput.classList.add("form-control", "data-input", "col-11");
 
