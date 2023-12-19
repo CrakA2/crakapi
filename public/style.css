@@ -140,7 +140,7 @@ footer>p {
   grid-template-rows: 70% 30%;
 }
 .red-box {
-  background-color: rgb(253, 101, 0);
+  background-color: rgb(206, 100, 30);
   grid-column: 1 / 4;
   grid-row: 1 / 2;
   color: white;
@@ -168,13 +168,13 @@ footer>p {
 	background-color: #00254b;
 }
 .rr {
-	background-color: #ff0000;
+	background-color: #d40000af;
 }
 .lb {
-  background-color: #ffcc00;
+  background-color: #dfb303;
 }
 .hs {
-  background-color: #029402;
+  background-color: #006600;
 }
 #userForm {
   display: flex;
