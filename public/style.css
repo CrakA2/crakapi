@@ -24,12 +24,24 @@ body {
   }
 }
 
-.red-box > h1 {
-  font-size: 8rem;
-  line-height: 0.72;
+.main-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: top;
+  overflow: hidden;
+}
+.main-top > h1 {
+  font-size: 10rem;
+  line-height: 0.7;
   margin: 0px 15px;
 }
-
+.V {
+  width: auto;
+  fill: #ffffff;
+  position: absolute;
+  top: -18vh;
+  right: 34.2%;
+}
 .red-box > h2 {
   font-size: 3rem;
   line-height: 0.72;
@@ -138,6 +150,8 @@ footer>p {
   display: grid;
   grid-template-columns: 20% 20% 20% 20% 20%;
   grid-template-rows: 70% 30%;
+  position: relative;
+  overflow: hidden;
 }
 .red-box {
   background-color: rgb(230, 92, 1);
