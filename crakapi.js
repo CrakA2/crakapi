@@ -8,12 +8,31 @@ const fs = require('fs');
 const app = express();
 const valorantdata = require('./valorantdata');
 
-// This should be a secret key stored securely, not in your code
-const SECRET_KEY = 'secretkey';
+
+const SECRET_KEY = 'unbgaq';
 
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+const url = require('url');
+
+const rateLimit = require('express-rate-limit');
+
+// Configure rate limiter for puuid with 10 requests per minute
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute window
+  max: 10, // 10 requests allowed per window
+  keyGenerator: (req) => {
+    // Parse the URL and extract the path
+    const parsedUrl = url.parse(req.url);
+    const pathParts = parsedUrl.pathname.split('/');
+    const puuid = pathParts[pathParts.length - 1];
+    return puuid;
+  },
+});
+
+
+app.use(limiter);
 
 // Initialize SQLite database
 let db = new sqlite3.Database('./sessions.db', (err) => {
