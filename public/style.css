@@ -86,22 +86,20 @@ h3 > span {
 .copy-icon {
   margin: auto;
 }
-.github {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 25px;
-  padding: 2px 4px;
-}
-.github > a {
+
+.github > button {
   text-decoration: none;
   color: black;
-  padding-top: 2px;
-  margin-right: 3px;
+  background-color: #f8f9fa;
+
 }
-.github:hover {
+.github:hover > button {
   background-color: #ffffff;
   border-color: #006fdf;
+}
+.github:hover > button {
+  color: #006fdf;
+  background-color: #ffffff;
 }
 .github-icon {
   height: 30px;
