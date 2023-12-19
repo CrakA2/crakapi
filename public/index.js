@@ -10,7 +10,7 @@ document
     loadingDiv.style.display = "flex";
 
     const fetchPromise = fetch(
-      `https://tame-yak-gear.cyclic.app//v1/account/${username}/${tag}?fs=json`
+      `https://api.crak.tech/v1/account/${username}/${tag}?fs=json`
     ).then((response) => {
       if (!response.ok) {
         throw new Error("Name or Tag not valid");
@@ -69,7 +69,7 @@ document
         );
         endpoints.forEach((endpoint) => {
           fetch(
-            `https://tame-yak-gear.cyclic.app//v1/${endpoint}/${region}/${puuid}?fs=json`
+            `https://api.crak.tech/v1/${endpoint}/${region}/${puuid}?fs=json`
           )
             .then((response) => response.json())
             .then((data) => {
@@ -109,7 +109,7 @@ function createDataElement(parent, labelContent, dataContent, endpoint) {
   dataInputGroup.classList.add("input-group", "row");
 
   const dataInput = document.createElement("input");
-  dataInput.value = `https://crakapi.cyclic.app/v1/${endpoint}`;
+  dataInput.value = `https://api.crak.techv1/${endpoint}`;
   dataInput.readOnly = true;
   dataInput.classList.add("form-control", "data-input", "col-11");
 
