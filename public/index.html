@@ -1,40 +1,83 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>CrakAPI Valorant</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="./games-valorant.png">
-</head>
-<body>
-    <div class="container">
-        <h1 class="text-center my-4">CrakAPI Valorant Endpoints</h1>
-        <p class="text-center">This is a simple API that allows you to get the Valorant stats of a player.</p>
-        <form id="userForm">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" class="form-control">
-            </div>
-            <div class="form-group">
-                <label for="tag">Tag #</label>
-                <input type="text" id="tag" name="tag" class="form-control">
-            </div>
-            <input type="submit" value="Submit" class="btn btn-primary">
-        </form>
-        <div id="results" class="mt-4"></div>
-    </div>
-    <div id="loading"  style="display: none;">
-        <div class="cube-folding">
-            <span class="leaf1"></span>
-            <span class="leaf2"></span>
-            <span class="leaf3"></span>
-            <span class="leaf4"></span>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" href="./games-valorant.png" />
+  </head>
+  <body>
+    <div class="phone-block"><h2>We Do not Support Phones as of now <br>You can use view as desktop, if you want to access</h2></div>
+    <nav class="navbar navbar-light bg-light">
+      <a class="navbar-brand" href="#">
+        <img
+          src="./games-valorant.png"
+          width="30"
+          height="30"
+          class="d-inline-block align-top"
+          alt=""
+        />
+        CrakAPI
+      </a>
+      <button class="github">
+        <img src="./github-mark.svg" class="github-icon" />
+        <a href="https://github.com/CrakA2/crakapi">Github</a>
+      </button>
+    </nav>
+    <div id="Main">
+      <div class="red-box">
+        <h1>CrakAPI <br> Valorant <br> Endpoints</h1>
+        <h2 class="subhead">
+          Stats For Your Chat.
+        </h2>
+        <div class="works-with">
+        <h2>Works With</h2>
+        <h3><span>NIGHTBOT</span><span>STREAMELEMENTS</span><span>STREAMLABS</span><span>& MORE</span></h3>
         </div>
       </div>
-      <footer class="text-center mt-4">
-        <p>We do not store your data. We only parse it and provide it to you.</p>
+      <div class="data-form">
+        <form id="userForm">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              class="form-input"
+            />
+          </div>
+          <div class="form-group">
+            <label for="tag">Tag #</label>
+            <input type="text" id="tag" name="tag" class="form-input" />
+          </div>
+          <input type="submit" value="Submit" class="sb" />
+        </form>
+      </div>
+      <div class="WL stat"><p>track<br>wins and loss</p></div>
+      <div class="KDA stat"><p>track<br>kills deaths assists</p></div>
+      <div class="rr stat"><p>track<br>Rank Rating</p></div>
+      <div class="lb stat"><p>track<br>Valorant Leaderboard</p></div>
+      <div class="hs stat"><p>track<br>Headshot Percentage</p></div>
+    </div>
+    <div class="data-load"><div id="results" class="mt-4"></div></div>
+    
+    <div id="loading" style="display: none">
+      <div class="cube-folding">
+        <span class="leaf1"></span>
+        <span class="leaf2"></span>
+        <span class="leaf3"></span>
+        <span class="leaf4"></span>
+      </div>
+    </div>
+    <footer class="footer">
+      <p>We do not store your data. We only parse it and provide it to you.</p>
     </footer>
     <script src="index.js"></script>
-    
-</body>
+  </body>
 </html>
