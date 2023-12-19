@@ -1,7 +1,7 @@
 # CrakAPI
 
 CrakAPI is a powerful API for fetching player data. 
-For a GUI version, please visit [https://crakapi.cyclic.app/](https://crakapi.cyclic.app/).
+For a GUI version, please visit [api.crak.tech](https://api.crak.tech/).
 
 ## API Endpoints
 

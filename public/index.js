@@ -109,7 +109,7 @@ function createDataElement(parent, labelContent, dataContent, endpoint) {
   dataInputGroup.classList.add("input-group", "row");
 
   const dataInput = document.createElement("input");
-  dataInput.value = `https://api.crak.techv1/${endpoint}`;
+  dataInput.value = `https://api.crak.tech/v1/${endpoint}`;
   dataInput.readOnly = true;
   dataInput.classList.add("form-control", "data-input", "col-11");
 
