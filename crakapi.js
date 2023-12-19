@@ -21,7 +21,7 @@ const rateLimit = require('express-rate-limit');
 // Configure rate limiter for puuid with 10 requests per minute
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute window
-  max: 10, // 10 requests allowed per window
+  max: 30, // 30 requests allowed per window
   keyGenerator: (req) => {
     // Parse the URL and extract the path
     const parsedUrl = url.parse(req.url);
