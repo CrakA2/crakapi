@@ -204,13 +204,19 @@ footer>p {
 
 .works-with {
   position: relative;
-  bottom: -5vh;
+  bottom: -15vh;
   margin-left: 15px;
   white-space: nowrap;
 }
 .works-with>h2 {
   font-size: 2rem;
   margin: 0px;
+}
+@media screen and (max-width: 1200px) {
+  .works-with {
+    bottom: -15vh;
+  }
+  
 }
 .data-load {
   display: flex;
