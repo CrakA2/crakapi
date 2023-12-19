@@ -47,15 +47,16 @@ body {
 
 }
 .valsvg {
-  height: 70vh;
-  min-width: 100%;
+  height: 60vh;
+  width: 60vw;
   display: flex;
   justify-content: flex-end;
   align-items: normal;
   z-index: 2;
   position: absolute;
-  top: -17vh;
-  left: 12vw;
+  top: -12vh;
+  left: 15vw;
+  min-width: 60vw;
 
 }
 .red-box > h2 {
