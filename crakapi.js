@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
-const sqlite3 = require('sqlite3').verbose();
+
 const path = require('path');
 const fs = require('fs');
 const app = express();
@@ -34,16 +34,16 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+// Import better-sqlite3
+const Database = require('better-sqlite3');
+
 // Initialize SQLite database
-let db = new sqlite3.Database('./sessions.db', (err) => {
-  if (err) {
-    console.error(err.message);
-  }
-  console.log('Connected to the sessions database.');
-});
+let db = new Database('./sessions.db');
+
+console.log('Connected to the sessions database.');
 
 // Create table if it doesn't exist
-db.run(`CREATE TABLE IF NOT EXISTS sessions (
+db.exec(`CREATE TABLE IF NOT EXISTS sessions (
   token TEXT PRIMARY KEY,
   region TEXT,
   puuid TEXT,

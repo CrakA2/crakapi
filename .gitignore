@@ -1,3 +1,48 @@
 node_modules
 sessions.db
 ulrl_request.py
+
+#!/bin/bash
+
+# Update packages
+sudo apt-get update
+
+# Install Apache
+sudo apt-get install -y apache2
+
+# Install Node.js and npm
+sudo apt-get install -y nodejs npm
+
+# Clone your repository
+git clone https://github.com/CrakA2/crakapi.git
+
+# Navigate into your project directory
+cd crakapi
+
+# Install npm dependencies
+npm install
+
+# Start your application
+npm start &
+
+# Configure Apache to proxy requests to your Node.js application
+echo "<VirtualHost *:80>
+    ServerName api.crak.tech
+    ProxyPass / http://localhost:3000/
+    ProxyPassReverse / http://localhost:3000/
+</VirtualHost>" | sudo tee /etc/apache2/sites-available/000-default.conf
+
+# Enable necessary Apache modules and restart Apache
+sudo a2enmod proxy
+sudo a2enmod proxy_http
+sudo service apache2 restart
+
+# Install Certbot (Let's Encrypt client)
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+
+# Obtain and install a certificate
+sudo certbot --apache -d api.crak.tech --non-interactive --agree-tos --email adarsh.citra@gmail.com
+
+# Add a cron job for automatic certificate renewal
+(crontab -l 2>/dev/null; echo "0 12 * * * /usr/bin/certbot renew --quiet") | crontab -
