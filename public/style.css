@@ -195,6 +195,7 @@ footer>p {
   border-radius: none !important;
   padding: 5px 5px !important;
   margin-top: 5%;
+  background-color: #fafafa !important;
 }
 .sb:hover {
   background-color: #006fdf !important;
