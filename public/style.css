@@ -96,7 +96,8 @@ h3 > span {
 .github > a {
   text-decoration: none;
   color: black;
-  margin-right: 2px;
+  padding-top: 2px;
+  margin-right: 3px;
 }
 .github:hover {
   background-color: #ffffff;
@@ -107,6 +108,7 @@ h3 > span {
   padding: 3px;
   padding-right: 5px;
   padding-left: 0px;
+  margin: 0px 0px 0px 0px;
 }
 
 #userForm {
@@ -140,7 +142,7 @@ footer>p {
   grid-template-rows: 70% 30%;
 }
 .red-box {
-  background-color: rgb(206, 100, 30);
+  background-color: rgb(230, 92, 1);
   grid-column: 1 / 4;
   grid-row: 1 / 2;
   color: white;
@@ -168,7 +170,7 @@ footer>p {
 	background-color: #00254b;
 }
 .rr {
-	background-color: #d40000af;
+	background-color: #c70505fa;
 }
 .lb {
   background-color: #dfb303;
