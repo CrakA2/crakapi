@@ -1,7 +1,6 @@
 body {
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
   font-family: "Bebas Neue", sans-serif;
 }
 
@@ -17,7 +16,7 @@ body {
   font-size: 2rem;
   font-weight: 700;
   text-align: center;
-  z-index: 4;
+  z-index: 6;
 }
 @media only screen and (min-width: 10px) and (max-width: 600px) {
   #phone-block {
@@ -187,7 +186,7 @@ footer>p {
   align-items: stretch;
   padding-left: 15px;
   overflow: hidden;
-  z-index: 1;
+  z-index: 1 !important;
   position: relative;
 }
 .data-form {
@@ -275,7 +274,7 @@ footer>p {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 5F;
+  z-index: 5;
 }
 .cube-folding {
   width: 50px;
