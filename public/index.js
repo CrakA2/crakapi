@@ -88,7 +88,8 @@ document
         });
         document.getElementById("userForm").style.display = "none";
         document.getElementById("Main").style.display = "none";
-        document.body.style.overflow = "scroll";
+        document.body.style.overflowX = "hidden";
+        document.body.style.overflowY = "scroll";
       })
       .catch((error) => {
         loadingDiv.style.display = "none";
