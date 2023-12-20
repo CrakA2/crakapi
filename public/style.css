@@ -5,11 +5,11 @@ body {
   font-family: "Bebas Neue", sans-serif;
 }
 
-.phone-block {
+#phone-block {
   width: 100%;
   height: 100%;
   background-color: #006fdf;
-  display: flex;
+  display: none;
   justify-content: center;
   align-items: center;
   flex-direction: column;
@@ -19,11 +19,12 @@ body {
   text-align: center;
   z-index: 4;
 }
-@media screen and (min-width: 600px) {
-  .phone-block {
-    display: none;
+@media only screen and (min-width: 10px) and (max-width: 600px) {
+  #phone-block {
+    display: flex;
   }
 }
+
 
 .main-top {
   display: flex;
@@ -274,7 +275,7 @@ footer>p {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 5;
+  z-index: 5F;
 }
 .cube-folding {
   width: 50px;
