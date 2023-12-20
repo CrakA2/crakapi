@@ -5,6 +5,9 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
+  <!-- Add an element to display the wins and losses -->
+  <p id="wl"></p>
+
   <script>
     // Get the region and PUUID from the URL
     const pathParts = window.location.pathname.split('/');
@@ -12,20 +15,28 @@
     const puuid = pathParts[pathParts.length - 2];
 
     // Start a new session
-    $.post(`https://crak.tech/v1/wl/${region}/${puuid}/start`, function(data) {
+    $.post(`http://localhost:3000/v1/wl/region1/puuid1/start`, function(data) {
       // Store the token
       const token = data.token;
 
       // Send a keep-alive message every 5 minutes
       setInterval(function() {
-        $.post(`https://crak.tech/v1/wl/${region}/${puuid}/keepalive`, { token });
+        $.post(`http://localhost:3000/v1/wl/region1/puuid1/keepalive`, { token });
       }, 5 * 60 * 1000);
 
       // Call the update API every minute
       setInterval(function() {
-        $.post(`https://crak.tech/v1/wl/${region}/${puuid}/update`);
-      }, 60 * 1000);
+        $.post(`http://localhost:3000/v1/wl/region1/puuid1/update`);
+      }, 9 * 1000);
+
+      // Get the wins and losses every minute
+      setInterval(function() {
+        $.get(`http://localhost:3000/v1/wl/region1/puuid1?fs=json`, function(data) {
+          // Update the wl element with the wins and losses
+          $('#wl').text(`Wins: ${data.wins}, Losses: ${data.losses}`);
+        });
+      }, 10 * 1000);
     });
-</script>
+  </script>
 </body>
 </html>
