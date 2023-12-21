@@ -203,7 +203,7 @@ app.post('/v1/wl/:region/:puuid/start', async (req, res) => {
 
 app.get('/v1/wl/:region/:puuid/sessiondata', (req, res) => {
   const filePath = path.join(__dirname, 'session.html');
-  fs.Promises.access(filePath, fs.constants.F_OK, (err) => {
+  fs.promises.access(filePath, fs.constants.F_OK, (err) => {
       if (err) {
           console.error(`File not found: ${filePath}`);
           res.status(404).send('File not found');
