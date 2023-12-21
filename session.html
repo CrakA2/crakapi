@@ -12,18 +12,18 @@
     const puuid = pathParts[pathParts.length - 2];
 
     // Start a new session
-    $.post(`https://crak.tech/v1/wl/${region}/${puuid}/start`, function(data) {
+    $.post(`https://api.crak.tech/v1/wl/${region}/${puuid}/start`, function(data) {
       // Store the token
       const token = data.token;
 
       // Send a keep-alive message every 5 minutes
       setInterval(function() {
-        $.post(`https://crak.tech/v1/wl/${region}/${puuid}/keepalive`, { token });
+        $.post(`https://api.crak.tech/v1/wl/${region}/${puuid}/keepalive`, { token });
       }, 5 * 60 * 1000);
 
       // Call the update API every minute
       setInterval(function() {
-        $.post(`https://crak.tech/v1/wl/${region}/${puuid}/update`);
+        $.post(`https:/api.crak.tech/v1/wl/${region}/${puuid}/update`);
       }, 60 * 1000);
     });
 </script>
