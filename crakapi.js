@@ -8,6 +8,12 @@ const fs = require('fs');
 const app = express();
 const valorantdata = require('./valorantdata');
 
+const https = require('https');
+// Load the HTTPS certificates
+const options = {
+  key: fs.readFileSync('/etc/letsencrypt/live/api.crak.tech/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/api.crak.tech/fullchain.pem')
+};
 
 const SECRET_KEY = 'unbgaq';
 
@@ -299,6 +305,11 @@ app.get('/v1/wl/:region/:puuid', (req, res) => {
   }
 });
   
-  app.listen(3000, () => {
-    console.log('Server is running on http://127.0.0.1:3000/');
-  });
+
+// Create the HTTPS server
+const server = https.createServer(options, app);
+
+// Listen on port 3000
+server.listen(3000, () => {
+  console.log('Server is running on https://127.0.0.1:3000/');
+});
