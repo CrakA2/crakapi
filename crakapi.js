@@ -257,42 +257,41 @@ async function updateAllActiveSessions() {
     isUpdating = false;
   }
 }
-app.get('/v1/wl/:region/:puuid/sessiondata', (req, res) => {
+
     
 // Run the function every minute
 setInterval(updateAllActiveSessions, 60 * 1000);
 
 app.get('/v1/wl/:region/:puuid', (req, res) => {
-  const { region, puuid } = req.params;
-  const format = req.query.fs;
+    const { region, puuid } = req.params;
+    const format = req.query.fs;
+  
+    // Get the session for the user
+    let stmt = db.prepare(`SELECT * FROM sessions WHERE puuid = ?`);
+    let row = stmt.get(puuid);
+    if (row) {
+        // If a session exists, send the wins and losses
+        if (format === 'json') {
+            res.json({ wins: row.wins, losses: row.losses });
+        } else {
+            res.send(`Wins: ${row.wins}, Losses: ${row.losses}`);
+        }
+    } else {
+        res.status(404).send('No session found for this puuid');
+    }
+  });
 
-  // Get the session for the user
-  let stmt = db.prepare(`SELECT * FROM sessions WHERE puuid = ?`);
-  let row = stmt.get(puuid);
-  if (row) {
-      // If a session exists, send the wins and losses
-      if (format === 'json') {
-          res.json({ wins: row.wins, losses: row.losses });
-      } else {
-          res.send(`Wins: ${row.wins}, Losses: ${row.losses}`);
-      }
-  } else {
-      res.status(404).send('No session found for this puuid');
-  }
-});
-
-app.get('/v1/wl/:region/:puuid/sessiondata', (req, res) => {
+  app.get('/v1/wl/:region/:puuid/sessiondata', (_, res) => {
     const filePath = path.join(__dirname, 'session.html');
     fs.promises.access(filePath, fs.constants.F_OK)
       .then(() => {
         res.sendFile(filePath);
       })
-      .catch(err => {
+      .catch(_ => {
         console.error(`File not found: ${filePath}`);
         res.status(404).send('File not found');
       });
-  });
-
+});
 
 // Create the HTTPS server
 const server = https.createServer(options, app);
