@@ -164,6 +164,9 @@ async function fetchMMR(region, puuid) {
     }
 }
 
+const SESSION_LENGTH = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+
+
 app.post('/v1/wl/:region/:puuid/start', async (req, res) => {
   const { region, puuid } = req.params;
 
@@ -177,7 +180,8 @@ app.post('/v1/wl/:region/:puuid/start', async (req, res) => {
       wins: 0,
       losses: 0,
       mmr,
-      last_active: Date.now(), // Add this line
+      last_active: Date.now(),
+      session_end: Date.now() + SESSION_LENGTH, // Add this line
   };
 
   // Create a JWT with the session data
@@ -188,103 +192,75 @@ app.post('/v1/wl/:region/:puuid/start', async (req, res) => {
   let row = stmt.get(puuid);
   if (row) {
       // If a session exists, reset the wins and losses and update the last active timestamp
-      let updateStmt = db.prepare(`UPDATE sessions SET wins = 0, losses = 0, mmr = ?, last_active = ? WHERE puuid = ?`);
-      let info = updateStmt.run(mmr, Date.now(), puuid);
-      if (info.changes === 0) {
-          console.log(`No session found for puuid ${puuid}`);
-      } else {
-          console.log(`Session for puuid ${puuid} has been reset`);
-      }
+      let updateStmt = db.prepare(`UPDATE sessions SET wins = 0, losses = 0, mmr = ?, last_active = ?, session_end = ? WHERE puuid = ?`);
+      let info = updateStmt.run(mmr, Date.now(), Date.now() + SESSION_LENGTH, puuid);
+      // ...
   } else {
       // If no session exists, insert a new row
-      let insertStmt = db.prepare(`INSERT INTO sessions(token, region, puuid, wins, losses, mmr, last_active) VALUES(?, ?, ?, ?, ?, ?, ?)`);
-      let info = insertStmt.run(token, region, puuid, 0, 0, mmr, Date.now());
-      console.log(`A row has been inserted with rowid ${info.lastInsertRowid}`);
+      let insertStmt = db.prepare(`INSERT INTO sessions(token, region, puuid, wins, losses, mmr, last_active, session_end) VALUES(?, ?, ?, ?, ?, ?, ?, ?)`);
+      let info = insertStmt.run(token, region, puuid, 0, 0, mmr, Date.now(), Date.now() + SESSION_LENGTH);
+      // ...
   }
 
   res.json({ token });
 });
 
+let isUpdating = false;
 
+async function updateAllActiveSessions() {
+  if (isUpdating) {
+    // If an update is already in progress, don't start another one
+    return;
+  }
 
-app.get('/v1/wl/:region/:puuid/sessiondata', (req, res) => {
-    const filePath = path.join(__dirname, 'session.html');
-    fs.promises.access(filePath, fs.constants.F_OK)
-      .then(() => {
-        res.sendFile(filePath);
-      })
-      .catch(err => {
-        console.error(`File not found: ${filePath}`);
-        res.status(404).send('File not found');
-      });
-  });
+  isUpdating = true;
 
-app.post('/v1/wl/:region/:puuid/update', async (req, res) => {
-  const { region, puuid } = req.params;
+  try {
+    // Get all active sessions
+    let stmt = db.prepare(`SELECT * FROM sessions WHERE session_end > ?`);
+    let rows = stmt.all(Date.now());
 
-  // Fetch the current MMR
-  const currentMMR = await fetchMMR(region, puuid);
+    // Iterate over each session
+    for (const row of rows) {
+      const { region, puuid } = row;
 
-  // Get the session for the user
-  let stmt = db.prepare(`SELECT * FROM sessions WHERE puuid = ?`);
-  let row = stmt.get(puuid);
-  if (row) {
-      // If a session exists, calculate the wins and losses
+      // Fetch the current MMR
+      let currentMMR;
+      try {
+        currentMMR = await fetchMMR(region, puuid);
+      } catch (err) {
+        console.error(`Failed to fetch MMR for ${region}/${puuid}: ${err}`);
+        continue;
+      }
+
+      // Calculate the wins and losses
       let wins = row.wins;
       let losses = row.losses;
+      let session_end = row.session_end;
       if (currentMMR > row.mmr) {
-          wins++;
+        wins++;
+        session_end = Date.now() + SESSION_LENGTH; // Extend the session
       } else if (currentMMR < row.mmr) {
-          losses++;
+        losses++;
+        session_end = Date.now() + SESSION_LENGTH; // Extend the session
       }
 
       // Update the session with the new wins, losses, and MMR
-      let updateStmt = db.prepare(`UPDATE sessions SET wins = ?, losses = ?, mmr = ? WHERE puuid = ?`);
-      let info = updateStmt.run(wins, losses, currentMMR, puuid);
-      if (info.changes === 0) {
-          console.log(`No session found for puuid ${puuid}`);
-      } else {
-          console.log(`Session for puuid ${puuid} has been updated`);
+      try {
+        let updateStmt = db.prepare(`UPDATE sessions SET wins = ?, losses = ?, mmr = ?, session_end = ? WHERE puuid = ?`);
+        let info = updateStmt.run(wins, losses, currentMMR, session_end, puuid);
+      } catch (err) {
+        console.error(`Failed to update session for ${puuid}: ${err}`);
       }
-  } else {
-      console.log(`No session found for puuid ${puuid}`);
-      res.status(404).send('No session found for this puuid');
+    }
+  } finally {
+    isUpdating = false;
   }
-});
-
-app.post('/v1/wl/:region/:puuid/keepalive', (req, res) => {
-  const { region, puuid } = req.params;
-  const { token } = req.body;
-
-  // Validate the token and find the session
-  jwt.verify(token, SECRET_KEY, (err, decoded) => {
-      if (err) {
-          res.status(401).send('Invalid token');
-          return;
-      }
-
-      // Update the "last active" timestamp for the session
-      const lastActive = Date.now();
-      db.run(
-          `UPDATE sessions SET last_active = ? WHERE puuid = ? AND region = ?`,
-          [lastActive, puuid, region],
-          function (err) {
-              if (err) {
-                  console.log(err.message);
-                  res.status(500).send('Failed to update session');
-                  return;
-              }
-
-              if (this.changes === 0) {
-                  res.status(404).send('Session not found');
-                  return;
-              }
-
-              res.sendStatus(200);
-          }
-      );
-  });
-});
+}
+app.get('/v1/wl/:region/:puuid/sessiondata', (req, res) => {
+    
+// Run the function every minute
+setInterval(updateAllActiveSessions, 60 * 1000);
 
 app.get('/v1/wl/:region/:puuid', (req, res) => {
   const { region, puuid } = req.params;
@@ -304,7 +280,19 @@ app.get('/v1/wl/:region/:puuid', (req, res) => {
       res.status(404).send('No session found for this puuid');
   }
 });
-  
+
+app.get('/v1/wl/:region/:puuid/sessiondata', (req, res) => {
+    const filePath = path.join(__dirname, 'session.html');
+    fs.promises.access(filePath, fs.constants.F_OK)
+      .then(() => {
+        res.sendFile(filePath);
+      })
+      .catch(err => {
+        console.error(`File not found: ${filePath}`);
+        res.status(404).send('File not found');
+      });
+  });
+
 
 // Create the HTTPS server
 const server = https.createServer(options, app);

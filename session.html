@@ -13,18 +13,6 @@
 
     // Start a new session
     $.post(`https://api.crak.tech/v1/wl/${region}/${puuid}/start`, function(data) {
-      // Store the token
-      const token = data.token;
-
-      // Send a keep-alive message every 5 minutes
-      setInterval(function() {
-        $.post(`https://api.crak.tech/v1/wl/${region}/${puuid}/keepalive`, { token });
-      }, 5 * 60 * 1000);
-
-      // Call the update API every minute
-      setInterval(function() {
-        $.post(`https:/api.crak.tech/v1/wl/${region}/${puuid}/update`);
-      }, 60 * 1000);
     });
 </script>
 </body>
