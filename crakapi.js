@@ -9,11 +9,11 @@ const app = express();
 const valorantdata = require('./valorantdata');
 
 const https = require('https');
-// Load the HTTPS certificates
 const options = {
   key: fs.readFileSync('/etc/letsencrypt/live/api.crak.tech/privkey.pem'),
   cert: fs.readFileSync('/etc/letsencrypt/live/api.crak.tech/fullchain.pem')
 };
+
 
 const SECRET_KEY = 'unbgaq';
 
@@ -40,24 +40,7 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-// Import better-sqlite3
-const Database = require('better-sqlite3');
 
-// Initialize SQLite database
-let db = new Database('./sessions.db');
-
-console.log('Connected to the sessions database.');
-
-// Create table if it doesn't exist
-db.exec(`CREATE TABLE IF NOT EXISTS sessions (
-  token TEXT PRIMARY KEY,
-  region TEXT,
-  puuid TEXT,
-  wins INTEGER,
-  losses INTEGER,
-  mmr INTEGER,
-  last_active INTEGER
-)`);
 
 app.get('/v1/hs/:region/:puuid', async (req, res) => {
     try {
@@ -164,93 +147,59 @@ async function fetchMMR(region, puuid) {
     }
 }
 
-const SESSION_LENGTH = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+const Database = require('better-sqlite3');
+let db = new Database('user_data.db');
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS user_reset_time (
+    puuid TEXT PRIMARY KEY,
+    region TEXT,
+    reset_time INTEGER
+  );
 
-app.post('/v1/wl/:region/:puuid/start', async (req, res) => {
-  const { region, puuid } = req.params;
-
-  // Fetch the initial MMR
-  const mmr = await fetchMMR(region, puuid);
-
-  // Start a new session for the user
-  const sessionData = {
-      region,
-      puuid,
-      wins: 0,
-      losses: 0,
-      mmr,
-      last_active: Date.now(),
-      session_end: Date.now() + SESSION_LENGTH, // Add this line
-  };
-
-  // Create a JWT with the session data
-  const token = jwt.sign(sessionData, SECRET_KEY);
-
-  // Check if a session for the puuid already exists
-  let stmt = db.prepare(`SELECT * FROM sessions WHERE puuid = ?`);
-  let row = stmt.get(puuid);
-  if (row) {
-      // If a session exists, reset the wins and losses and update the last active timestamp
-      let updateStmt = db.prepare(`UPDATE sessions SET wins = 0, losses = 0, mmr = ?, last_active = ?, session_end = ? WHERE puuid = ?`);
-      let info = updateStmt.run(mmr, Date.now(), Date.now() + SESSION_LENGTH, puuid);
-      // ...
-  } else {
-      // If no session exists, insert a new row
-      let insertStmt = db.prepare(`INSERT INTO sessions(token, region, puuid, wins, losses, mmr, last_active, session_end) VALUES(?, ?, ?, ?, ?, ?, ?, ?)`);
-      let info = insertStmt.run(token, region, puuid, 0, 0, mmr, Date.now(), Date.now() + SESSION_LENGTH);
-      // ...
-  }
-
-  res.json({ token });
-});
-
-let isUpdating = false;
+  CREATE TABLE IF NOT EXISTS user_mmr (
+    puuid TEXT PRIMARY KEY,
+    mmr INTEGER,
+    wins INTEGER DEFAULT 0,
+    losses INTEGER DEFAULT 0
+  );
+`);
 
 async function updateAllActiveSessions() {
   if (isUpdating) {
-    // If an update is already in progress, don't start another one
     return;
   }
 
   isUpdating = true;
 
   try {
-    // Get all active sessions
-    let stmt = db.prepare(`SELECT * FROM sessions WHERE session_end > ?`);
-    let rows = stmt.all(Date.now());
+    let stmt = db.prepare(`SELECT * FROM user_reset_time`);
+    let rows = stmt.all();
 
-    // Iterate over each session
     for (const row of rows) {
-      const { region, puuid } = row;
+      const { region, puuid, reset_time } = row;
 
-      // Fetch the current MMR
-      let currentMMR;
-      try {
-        currentMMR = await fetchMMR(region, puuid);
-      } catch (err) {
-        console.error(`Failed to fetch MMR for ${region}/${puuid}: ${err}`);
-        continue;
-      }
+      if (Date.now() >= reset_time) {
+        try {
+          let mmrStmt = db.prepare(`SELECT mmr FROM user_mmr WHERE puuid = ?`);
+          let mmrRow = mmrStmt.get(puuid);
 
-      // Calculate the wins and losses
-      let wins = row.wins;
-      let losses = row.losses;
-      let session_end = row.session_end;
-      if (currentMMR > row.mmr) {
-        wins++;
-        session_end = Date.now() + SESSION_LENGTH; // Extend the session
-      } else if (currentMMR < row.mmr) {
-        losses++;
-        session_end = Date.now() + SESSION_LENGTH; // Extend the session
-      }
+          const currentMMR = await fetchMMR(region, puuid);
 
-      // Update the session with the new wins, losses, and MMR
-      try {
-        let updateStmt = db.prepare(`UPDATE sessions SET wins = ?, losses = ?, mmr = ?, session_end = ? WHERE puuid = ?`);
-        let info = updateStmt.run(wins, losses, currentMMR, session_end, puuid);
-      } catch (err) {
-        console.error(`Failed to update session for ${puuid}: ${err}`);
+          if (mmrRow) {
+            if (currentMMR > mmrRow.mmr) {
+              db.prepare(`UPDATE user_mmr SET wins = wins + 1, mmr = ? WHERE puuid = ?`).run(currentMMR, puuid);
+            } else if (currentMMR < mmrRow.mmr) {
+              db.prepare(`UPDATE user_mmr SET losses = losses + 1, mmr = ? WHERE puuid = ?`).run(currentMMR, puuid);
+            }
+          } else {
+            db.prepare(`INSERT INTO user_mmr (puuid, mmr) VALUES (?, ?)`).run(puuid, currentMMR);
+          }
+
+          db.prepare(`UPDATE user_reset_time SET reset_time = ? WHERE puuid = ?`).run(Date.now() + 24 * 60 * 60 * 1000, puuid);
+        } catch (err) {
+          console.error(`Failed to update MMR and reset time for ${puuid}: ${err}`);
+        }
       }
     }
   } finally {
@@ -258,39 +207,74 @@ async function updateAllActiveSessions() {
   }
 }
 
-    
-// Run the function every minute
 setInterval(updateAllActiveSessions, 60 * 1000);
 
 app.get('/v1/wl/:region/:puuid', (req, res) => {
-    const { region, puuid } = req.params;
-    const format = req.query.fs;
-  
-    // Get the session for the user
-    let stmt = db.prepare(`SELECT * FROM sessions WHERE puuid = ?`);
-    let row = stmt.get(puuid);
-    if (row) {
-        // If a session exists, send the wins and losses
-        if (format === 'json') {
-            res.json({ wins: row.wins, losses: row.losses });
-        } else {
-            res.send(`Wins: ${row.wins}, Losses: ${row.losses}`);
-        }
-    } else {
-        res.status(404).send('No session found for this puuid');
-    }
-  });
+  const { region, puuid } = req.params;
+  const reset_time = req.query.reset_time;
 
-  app.get('/v1/wl/:region/:puuid/sessiondata', (_, res) => {
-    const filePath = path.join(__dirname, 'session.html');
-    fs.promises.access(filePath, fs.constants.F_OK)
-      .then(() => {
-        res.sendFile(filePath);
-      })
-      .catch(_ => {
-        console.error(`File not found: ${filePath}`);
-        res.status(404).send('File not found');
-      });
+  let stmt = db.prepare(`SELECT * FROM user_reset_time WHERE puuid = ?`);
+  let row = stmt.get(puuid);
+
+  if (row) {
+    if (reset_time) {
+      let updateStmt = db.prepare(`UPDATE user_reset_time SET reset_time = ? WHERE puuid = ?`);
+      let info = updateStmt.run(reset_time, puuid);
+    }
+  } else {
+    let insertStmt = db.prepare(`INSERT INTO user_reset_time (puuid, region, reset_time) VALUES (?, ?, ?)`);
+    let info = insertStmt.run(puuid, region, reset_time || Date.now());
+  }
+
+  stmt = db.prepare(`SELECT * FROM sessions WHERE puuid = ?`);
+  row = stmt.get(puuid);
+
+  if (row) {
+    res.json({ wins: row.wins, losses: row.losses });
+  } else {
+    res.status(404).send('No session found for this puuid');
+  }
+});
+
+app.patch('/v1/wl/:region/:puuid/reset_time', (req, res) => {
+  const { region, puuid } = req.params;
+  const { reset_time } = req.body;
+
+  let stmt = db.prepare(`SELECT * FROM user_reset_time WHERE puuid = ?`);
+  let row = stmt.get(puuid);
+
+  if (row) {
+    let updateStmt = db.prepare(`UPDATE user_reset_time SET reset_time = ? WHERE puuid = ?`);
+    let info = updateStmt.run(reset_time, puuid);
+    res.json({ message: 'Reset time updated successfully' });
+  } else {
+    res.status(404).json({ message: 'No user found for this puuid' });
+  }
+});
+app.get('/v1/wl/:region/:puuid/w', (req, res) => {
+  const { puuid } = req.params;
+
+  let stmt = db.prepare(`SELECT wins FROM user_mmr WHERE puuid = ?`);
+  let row = stmt.get(puuid);
+
+  if (row) {
+    res.json({ wins: row.wins });
+  } else {
+    res.status(404).json({ message: 'No user found for this puuid' });
+  }
+});
+
+app.get('/v1/wl/:region/:puuid/l', (req, res) => {
+  const { puuid } = req.params;
+
+  let stmt = db.prepare(`SELECT losses FROM user_mmr WHERE puuid = ?`);
+  let row = stmt.get(puuid);
+
+  if (row) {
+    res.json({ losses: row.losses });
+  } else {
+    res.status(404).json({ message: 'No user found for this puuid' });
+  }
 });
 
 // Create the HTTPS server

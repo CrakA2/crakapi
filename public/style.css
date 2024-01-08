@@ -346,6 +346,9 @@ footer>p {
   animation-delay: 0.6s;
   background-color: #e6e6e6;
 }
+#resetTimeForm {
+  display: hidden;
+}
 
 @-webkit-keyframes folding {
   0%,

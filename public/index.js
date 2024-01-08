@@ -157,3 +157,27 @@ document.getElementById('username').addEventListener('change', function() {
 document.getElementById('tag').addEventListener('change', function() {
   this.value = encodeURIComponent(this.value);
 });
+for (let i = 0; i < 24; i++) {
+  const option = document.createElement('option');
+  option.value = i;
+  option.text = `${i}:00`;
+  document.getElementById('resetTime').appendChild(option);
+}
+
+fetch(`/v1/wl/${region}/${puuid}/reset_time`)
+  .then(response => response.json())
+  .then(data => {
+    const resetTime = new Date(data.reset_time).getUTCHours();
+    document.getElementById('resetTime').value = resetTime;
+  })
+  .catch(error => console.error('Error:', error));
+const resetTimeForm = document.getElementById('resetTimeForm');
+resetTimeForm.style.display = 'flex';
+document.getElementById('resetTimeForm').addEventListener('submit', event => {
+  event.preventDefault();
+
+  const resetTime = document.getElementById('resetTime').value;
+  const resetTimeInMilliseconds = new Date().setUTCHours(resetTime, 0, 0, 0);
+
+  updateResetTime(region, puuid, resetTimeInMilliseconds);
+});
