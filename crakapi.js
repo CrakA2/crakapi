@@ -9,11 +9,6 @@ const app = express();
 const valorantdata = require('./valorantdata');
 
 const https = require('https');
-const options = {
-  key: fs.readFileSync('/etc/letsencrypt/live/api.crak.tech/privkey.pem'),
-  cert: fs.readFileSync('/etc/letsencrypt/live/api.crak.tech/fullchain.pem')
-};
-
 
 const SECRET_KEY = 'unbgaq';
 
@@ -57,6 +52,9 @@ app.get('/v1/hs/:region/:puuid', async (req, res) => {
     } catch (error) {
         res.status(500).send(error.message);
     }
+});
+app.get('/', (req, res) => {
+  res.sendFile(path.join('./public', 'index.html'));
 });
 
 app.get('/v1/rr/:region/:puuid', async (req, res) => {
@@ -148,6 +146,7 @@ async function fetchMMR(region, puuid) {
 }
 
 const Database = require('better-sqlite3');
+const http = require('http');
 let db = new Database('user_data.db');
 let isUpdating = false;
 
@@ -278,8 +277,11 @@ app.get('/v1/wl/:region/:puuid/l', (req, res) => {
   }
 });
 
-// Create the HTTPS server
-const server = https.createServer(options, app);
+
+const server = https.createServer({
+  key: fs.readFileSync('path/to/private.key'),
+  cert: fs.readFileSync('path/to/certificate.crt'),
+}, app);
 
 // Listen on port 3000
 server.listen(3000, () => {
