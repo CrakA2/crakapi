@@ -276,12 +276,12 @@ app.get('/v1/wl/:region/:puuid/l', (req, res) => {
     res.status(404).json({ message: 'No user found for this puuid' });
   }
 });
+const options = {
+  key: fs.readFileSync('/etc/letsencrypt/live/api.crak.tech/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/api.crak.tech/fullchain.pem')
+};
 
-
-const server = https.createServer({
-  key: fs.readFileSync('path/to/private.key'),
-  cert: fs.readFileSync('path/to/certificate.crt'),
-}, app);
+const server = https.createServer(options, app);
 
 // Listen on port 3000
 server.listen(3000, () => {
