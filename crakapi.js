@@ -149,6 +149,7 @@ async function fetchMMR(region, puuid) {
 
 const Database = require('better-sqlite3');
 let db = new Database('user_data.db');
+let isUpdating = false;
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS user_reset_time (
