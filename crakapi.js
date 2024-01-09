@@ -211,7 +211,7 @@ setInterval(updateAllActiveSessions, 60 * 1000);
 
 app.get('/v1/wl/:region/:puuid', (req, res) => {
   const { region, puuid } = req.params;
-  const reset_time = req.query.reset_time;
+  const { reset_time, fs } = req.query;
 
   let stmt = db.prepare(`SELECT * FROM user_reset_time WHERE puuid = ?`);
   let row = stmt.get(puuid);
@@ -230,12 +230,15 @@ app.get('/v1/wl/:region/:puuid', (req, res) => {
   row = stmt.get(puuid);
 
   if (row) {
-    res.json({ wins: row.wins, losses: row.losses });
+    if (fs === 'json') {
+      res.json({ wins: row.wins, losses: row.losses });
+    } else {
+      res.send(`Has won ${row.wins} and lost ${row.losses}`);
+    }
   } else {
     res.status(404).send('No user found for this puuid');
   }
 });
-
 app.patch('/v1/wl/:region/:puuid/reset_time', (req, res) => {
   const { region, puuid } = req.params;
   const { reset_time } = req.body;
