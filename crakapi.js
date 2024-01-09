@@ -230,9 +230,9 @@ app.get('/v1/wl/:region/:puuid', (req, res) => {
   row = stmt.get(puuid);
 
   if (row) {
-    res.json({ mmr: row.mmr });
+    res.json({ wins: row.wins, losses: row.losses });
   } else {
-    res.status(404).send('No MMR found for this puuid');
+    res.status(404).send('No user found for this puuid');
   }
 });
 
