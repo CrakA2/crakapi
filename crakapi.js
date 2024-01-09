@@ -242,8 +242,6 @@ app.get('/v1/wl/:region/:puuid', (req, res) => {
 app.patch('/v1/wl/:region/:puuid/reset_time', (req, res) => {
   const { region, puuid } = req.params;
   const { reset_time } = req.body;
-
-  // Input validation
   if (!region || !puuid || !reset_time) {
     return res.status(400).json({ message: 'Missing required parameters' });
   }
@@ -262,6 +260,26 @@ app.patch('/v1/wl/:region/:puuid/reset_time', (req, res) => {
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ message: 'An error occurred while updating the reset time' });
+  }
+});
+app.get('/v1/wl/:region/:puuid/reset_time', (req, res) => {
+  const { region, puuid } = req.params;
+  if (!region || !puuid) {
+    return res.status(400).json({ message: 'Missing required parameters' });
+  }
+
+  try {
+    let stmt = db.prepare(`SELECT * FROM user_reset_time WHERE puuid = ?`);
+    let row = stmt.get(puuid);
+
+    if (row) {
+      res.json({ message: `Current reset time: ${row.reset_time}` });
+    } else {
+      res.status(404).json({ message: 'No user found for this puuid' });
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).json({ message: 'An error occurred while retrieving the reset time' });
   }
 });
 app.get('/v1/wl/:region/:puuid/w', (req, res) => {

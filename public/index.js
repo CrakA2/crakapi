@@ -158,40 +158,41 @@ for (let i = 0; i < 24; i++) {
   document.getElementById('resetTime').appendChild(option);
 }
 
-// Fetch the current reset time
-fetch(`https://api.crak.tech/v1/wl/${region}/${puuid}/reset_time`)
-  .then(response => response.json())
-  .then(data => {
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const response = await fetch(`https://api.crak.tech/v1/wl/${region}/${puuid}/reset_time`);
+    const data = await response.json();
     const currentResetTime = new Date(data.reset_time).getUTCHours();
     document.getElementById('resetTime').value = currentResetTime;
-  })
-  .catch(error => console.error('Error:', error));
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
 
-  document.getElementById('resetTimeForm').addEventListener('submit', event => {
-    event.preventDefault();
-  
-    const resetTime = document.getElementById('resetTime').value;
-    const currentDate = new Date();
-    currentDate.setUTCHours(resetTime, 0, 0, 0);
-    const resetTimeInMilliseconds = currentDate.getTime();
-  
-    fetch(`https://api.crak.tech/v1/wl/${region}/${puuid}/reset_time`, {
+document.getElementById('resetTimeForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const resetTime = document.getElementById('resetTime').value;
+  const currentDate = new Date();
+  currentDate.setUTCHours(resetTime, 0, 0, 0);
+  const resetTimeInMilliseconds = currentDate.getTime();
+
+  try {
+    const response = await fetch(`https://api.crak.tech/v1/wl/${region}/${puuid}/reset_time`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ reset_time: resetTimeInMilliseconds }),
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-        return response.json();
-      })
-      .then(data => {
-        alert('Reset time updated!');
-      })
-      .catch(error => {
-        console.error('Error:', error);
-      });
-  });
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    await response.json();
+    alert('Reset time updated!');
+  } catch (error) {
+    console.error('Error:', error);
+  }
+});
