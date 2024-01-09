@@ -226,13 +226,13 @@ app.get('/v1/wl/:region/:puuid', (req, res) => {
     let info = insertStmt.run(puuid, region, reset_time || Date.now());
   }
 
-  stmt = db.prepare(`SELECT * FROM sessions WHERE puuid = ?`);
+  stmt = db.prepare(`SELECT * FROM user_mmr WHERE puuid = ?`);
   row = stmt.get(puuid);
 
   if (row) {
-    res.json({ wins: row.wins, losses: row.losses });
+    res.json({ mmr: row.mmr });
   } else {
-    res.status(404).send('No session found for this puuid');
+    res.status(404).send('No MMR found for this puuid');
   }
 });
 
