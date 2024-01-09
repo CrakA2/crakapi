@@ -239,7 +239,7 @@ app.get('/v1/wl/:region/:puuid', (req, res) => {
     res.status(404).send('No user found for this puuid');
   }
 });
-app.patch('/v1/wl/:region/:puuid/reset', (req, res) => {
+app.patch('/v1/wl/:region/:puuid/reset_time', (req, res) => {
   const { region, puuid } = req.params;
   if (!region || !puuid) {
     return res.status(400).json({ message: 'Missing required parameters' });

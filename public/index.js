@@ -146,7 +146,7 @@ document.getElementById('resetTimeForm').addEventListener('submit', async (event
   const resetTime = document.getElementById('resetTime').value;
   const currentDate = new Date();
   currentDate.setUTCHours(resetTime, 0, 0, 0);
-  const resetTimeInMilliseconds = currentDate.getTime();
+  const resetTimeISO = currentDate.toISOString();
 
   try {
     const response = await fetch(`https://api.crak.tech/v1/wl/${region}/${puuid}/reset_time`, {
@@ -154,10 +154,12 @@ document.getElementById('resetTimeForm').addEventListener('submit', async (event
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ reset_time: resetTimeInMilliseconds }),
+      body: JSON.stringify({ reset_time: resetTimeISO }),
     });
 
     if (!response.ok) {
+      console.log('Response status:', response.status);
+      console.log('Response text:', await response.text());
       throw new Error('Network response was not ok');
     }
 
