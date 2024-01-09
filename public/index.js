@@ -1,67 +1,91 @@
-let region; 
+let region;
 let puuid;
 
-document.getElementById("userForm").addEventListener("submit", async function (event) {
-  event.preventDefault();
+document
+  .getElementById("userForm")
+  .addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-  const username = document.getElementById("username").value;
-  const tag = document.getElementById("tag").value;
+    const username = document.getElementById("username").value;
+    const tag = document.getElementById("tag").value;
 
-  const loadingDiv = document.getElementById("loading");
-  loadingDiv.style.display = "flex";
+    const loadingDiv = document.getElementById("loading");
+    loadingDiv.style.display = "flex";
 
-  try {
-    const response = await fetch(`https://api.crak.tech/v1/account/${username}/${tag}?fs=json`);
-    if (!response.ok) {
-      throw new Error("Name or Tag not valid");
+    try {
+      const response = await fetch(
+        `https://api.crak.tech/v1/account/${username}/${tag}?fs=json`
+      );
+      if (!response.ok) {
+        throw new Error("Name or Tag not valid");
+      }
+      const data = await response.json();
+      setTimeout(() => {
+        loadingDiv.style.display = "none";
+        document.getElementById("userForm").style.display = "none";
+        document.getElementById("Main").style.display = "none";
+        document.body.style.overflowX = "hidden";
+        document.body.style.overflowY = "scroll";
+      }, 2000);
+
+      puuid = data.account.puuid;
+      region = data.account.region;
+
+      const resultDiv = document.getElementById("results");
+      resultDiv.classList.add("text-center", "result-div");
+
+      createDataElement(resultDiv, "PUUID", puuid, `${puuid}`);
+      const regionMapping = {
+        ap: "Asia-Pacific[AP]",
+        br: "Brazil[BR]",
+        eu: "Europe[EU]",
+        kr: "Korea[KR]",
+        latam: "Latin America[LA]",
+        na: "North America[NA]",
+      };
+      const fullName = regionMapping[region] || region;
+      createDataElement(resultDiv, "Region", fullName, `${fullName}`);
+      createDataElement(
+        resultDiv,
+        "Win Loss API Endpoint",
+        region,
+        `wl/${region}/${puuid}`
+      );
+
+      const endpoints = ["hs", "rr", "lb", "kd"];
+      for (const endpoint of endpoints) {
+        try {
+          const endpointResponse = await fetch(
+            `https://api.crak.tech/v1/${endpoint}/${region}/${puuid}?fs=json`
+          );
+          if (!endpointResponse.ok) {
+            throw new Error(`Failed to fetch data from ${endpoint} endpoint`);
+          }
+          const endpointData = await endpointResponse.json();
+          Object.keys(endpointData).forEach((key) => {
+            createDataElement(
+              resultDiv,
+              `${endpoint.toUpperCase()} - ${key}`,
+              endpointData[key],
+              `${endpoint}/${region}/${puuid}`
+            );
+          });
+        } catch (error) {
+          console.error(
+            `Error fetching data from ${endpoint} endpoint:`,
+            error
+          );
+        }
+      }
+      document.getElementById("userForm").style.display = "none";
+      document.getElementById("Main").style.display = "none";
+      document.body.style.overflowX = "hidden";
+      document.body.style.overflowY = "scroll";
+    } catch (error) {
+      loadingDiv.style.display = "none";
+      alert(error.message);
     }
-    const data = await response.json();
-    loadingDiv.style.display = "none";
-
-    puuid = data.account.puuid;
-    region = data.account.region; 
-
-    const resultDiv = document.getElementById("results");
-    resultDiv.classList.add("text-center", "result-div");
-
-    createDataElement(resultDiv, "PUUID", puuid, `${puuid}`);
-    const regionMapping = {
-      'ap': 'Asia-Pacific[AP]',
-      'br': 'Brazil[BR]',
-      'eu': 'Europe[EU]',
-      'kr': 'Korea[KR]',
-      'latam': 'Latin America[LA]',
-      'na': 'North America[NA]'
-    };
-    const fullName = regionMapping[region] || region;
-    createDataElement(resultDiv, "Region", fullName, `${fullName}`);
-    createDataElement(resultDiv, "Win Loss API Endpoint", region, `wl/${region}/${puuid}`);
-
-    const endpoints = ["hs", "rr", "lb", "kd"];
-for (const endpoint of endpoints) {
-  try {
-    const endpointResponse = await fetch(`https://api.crak.tech/v1/${endpoint}/${region}/${puuid}?fs=json`);
-    if (!endpointResponse.ok) {
-      throw new Error(`Failed to fetch data from ${endpoint} endpoint`);
-    }
-    const endpointData = await endpointResponse.json();
-    Object.keys(endpointData).forEach((key) => {
-      createDataElement(resultDiv, `${endpoint.toUpperCase()} - ${key}`, endpointData[key], `${endpoint}/${region}/${puuid}`);
-    });
-  } catch (error) {
-    console.error(`Error fetching data from ${endpoint} endpoint:`, error);
-  }
-}
-
-    document.getElementById("userForm").style.display = "none";
-    document.getElementById("Main").style.display = "none";
-    document.body.style.overflowX = "hidden";
-    document.body.style.overflowY = "scroll";
-  } catch (error) {
-    loadingDiv.style.display = "none";
-    alert(error.message);
-  }
-});
+  });
 function createDataElement(parent, labelContent, dataContent, endpoint) {
   const dataDiv = document.createElement("div");
   dataDiv.classList.add("data-div", "d-flex", "flex-column", "mb-3");
@@ -70,7 +94,6 @@ function createDataElement(parent, labelContent, dataContent, endpoint) {
   dataLabel.textContent = labelContent + `: ${dataContent}`;
   dataLabel.classList.add("data-label", "mb-1");
   dataDiv.appendChild(dataLabel);
-
 
   const dataInputGroup = document.createElement("div");
   dataInputGroup.classList.add("input-group", "row");
@@ -89,8 +112,10 @@ function createDataElement(parent, labelContent, dataContent, endpoint) {
     navigator.clipboard.writeText(dataInput.value);
   });
 
-
-  const copyIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const copyIcon = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg"
+  );
   copyIcon.setAttribute("viewBox", "0 0 101 130");
   copyIcon.setAttribute("width", "15px");
   copyIcon.setAttribute("height", "15px");
@@ -115,61 +140,66 @@ function createDataElement(parent, labelContent, dataContent, endpoint) {
   parent.appendChild(dataDiv);
 }
 
-document.getElementById('username').addEventListener('change', function() {
+document.getElementById("username").addEventListener("change", function () {
   this.value = encodeURIComponent(this.value);
 });
 
-document.getElementById('tag').addEventListener('change', function() {
+document.getElementById("tag").addEventListener("change", function () {
   this.value = encodeURIComponent(this.value);
 });
 
-
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   try {
-    const response = await fetch(`https://api.crak.tech/v1/wl/${region}/${puuid}/reset_time`);
-    const data = await response.json();
-    const currentResetTime = new Date(data.reset_time).getUTCHours();
-    document.getElementById('resetTime').value = currentResetTime;
-
-    // Populate the dropdown after the reset time is fetched
     for (let i = 0; i < 24; i++) {
-      const option = document.createElement('option');
+      const option = document.createElement("option");
       option.value = i;
       option.text = `${i}:00`;
-      document.getElementById('resetTime').appendChild(option);
+      document.getElementById("resetTime").appendChild(option);
     }
+
+    const response = await fetch(
+      `https://api.crak.tech/v1/wl/${region}/${puuid}/reset_time`
+    );
+    const data = await response.json();
+    const resetTime = new Date(data.reset_time);
+    const currentResetHour = resetTime.getUTCHours();
+    document.getElementById("resetTime").value = currentResetHour;
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error:", error);
   }
 });
 
-document.getElementById('resetTimeForm').addEventListener('submit', async (event) => {
-  event.preventDefault();
+document
+  .getElementById("resetTimeForm")
+  .addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-  const resetTime = document.getElementById('resetTime').value;
-  const currentDate = new Date();
-  currentDate.setUTCHours(resetTime, 0, 0, 0);
-  const resetTimeISO = currentDate.toISOString();
+    const resetTime = document.getElementById("resetTime").value;
+    const currentDate = new Date();
+    currentDate.setUTCHours(resetTime, 0, 0, 0);
+    const resetTimeISO = currentDate.toISOString();
 
+    try {
+      const response = await fetch(
+        `https://api.crak.tech/v1/wl/${region}/${puuid}/reset_time`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ reset_time: resetTimeISO }),
+        }
+      );
 
-  try {
-    const response = await fetch(`https://api.crak.tech/v1/wl/${region}/${puuid}/reset_time`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ reset_time: resetTimeISO }),
-    });
+      if (!response.ok) {
+        console.log("Response status:", response.status);
+        console.log("Response text:", await response.text());
+        throw new Error("Network response was not ok");
+      }
 
-    if (!response.ok) {
-      console.log('Response status:', response.status);
-      console.log('Response text:', await response.text());
-      throw new Error('Network response was not ok');
+      await response.json();
+      alert("Reset time updated!");
+    } catch (error) {
+      console.error("Error:", error);
     }
-
-    await response.json();
-    alert('Reset time updated!');
-  } catch (error) {
-    console.error('Error:', error);
-  }
-});
+  });
