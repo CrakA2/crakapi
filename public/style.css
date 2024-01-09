@@ -348,6 +348,7 @@ footer>p {
 }
 #resetTimeForm {
   display: hidden;
+  width: 100%;
 }
 
 @-webkit-keyframes folding {

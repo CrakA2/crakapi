@@ -132,7 +132,12 @@
         <p>track<br />Headshot Percentage</p>
       </div>
     </div>
-    <div class="data-load"><div id="results" class="mt-4"></div></div>
+    <div class="data-load"><div id="results" class="mt-4"><form id="resetTimeForm">
+      <label for="resetTime">Reset Time:</label>
+      <select id="resetTime">
+      </select>
+      <button type="submit">Submit</button>
+    </form></div></div>
 
     <div id="loading" style="display: none">
       <div class="cube-folding">
@@ -142,12 +147,7 @@
         <span class="leaf4"></span>
       </div>
     </div>
-    <form id="resetTimeForm">
-      <label for="resetTime">Reset Time:</label>
-      <select id="resetTime">
-      </select>
-      <button type="submit">Submit</button>
-    </form>
+    
     <footer class="footer">
       <p>We do not store your data. We only parse it and provide it to you.</p>
     </footer>
