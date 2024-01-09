@@ -239,10 +239,9 @@ app.get('/v1/wl/:region/:puuid', (req, res) => {
     res.status(404).send('No user found for this puuid');
   }
 });
-app.patch('/v1/wl/:region/:puuid/reset_time', (req, res) => {
+app.patch('/v1/wl/:region/:puuid/reset', (req, res) => {
   const { region, puuid } = req.params;
-  const { reset_time } = req.body;
-  if (!region || !puuid || !reset_time) {
+  if (!region || !puuid) {
     return res.status(400).json({ message: 'Missing required parameters' });
   }
 
@@ -251,15 +250,22 @@ app.patch('/v1/wl/:region/:puuid/reset_time', (req, res) => {
     let row = stmt.get(puuid);
 
     if (row) {
-      let updateStmt = db.prepare(`UPDATE user_reset_time SET reset_time = ? WHERE puuid = ?`);
-      let info = updateStmt.run(reset_time, puuid);
-      res.json({ message: `Reset time updated successfully. ${info.changes} row(s) updated.` });
+      let currentTime = new Date();
+      let resetTime = new Date(row.reset_time);
+
+      if (resetTime < currentTime) {
+        resetTime.setHours(resetTime.getHours() + 24);
+        let updateStmt = db.prepare(`UPDATE user_reset_time SET reset_time = ? WHERE puuid = ?`);
+        updateStmt.run(resetTime.toISOString(), puuid);
+      }
+
+      res.json({ message: 'Wins and losses reset successfully' });
     } else {
       res.status(404).json({ message: 'No user found for this puuid' });
     }
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ message: 'An error occurred while updating the reset time' });
+    res.status(500).json({ message: 'An error occurred while resetting wins and losses' });
   }
 });
 app.get('/v1/wl/:region/:puuid/reset_time', (req, res) => {
@@ -275,7 +281,12 @@ app.get('/v1/wl/:region/:puuid/reset_time', (req, res) => {
     if (row) {
       res.json({ message: `Current reset time: ${row.reset_time}` });
     } else {
-      res.status(404).json({ message: 'No user found for this puuid' });
+      let currentTime = new Date();
+      currentTime.setHours(currentTime.getHours() + 24); 
+      let insertStmt = db.prepare(`INSERT INTO user_reset_time (puuid, reset_time) VALUES (?, ?)`);
+      insertStmt.run(puuid, currentTime.toISOString());
+
+      res.json({ message: `New user added, reset time: ${currentTime.toISOString()}` });
     }
   } catch (error) {
     console.error('Error:', error);

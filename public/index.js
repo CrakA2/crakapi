@@ -1,96 +1,67 @@
-document
-  .getElementById("userForm")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
+let region; 
+let puuid;
 
-    const username = document.getElementById("username").value;
-    const tag = document.getElementById("tag").value;
+document.getElementById("userForm").addEventListener("submit", async function (event) {
+  event.preventDefault();
 
-    const loadingDiv = document.getElementById("loading");
-    loadingDiv.style.display = "flex";
+  const username = document.getElementById("username").value;
+  const tag = document.getElementById("tag").value;
 
-    const fetchPromise = fetch(
-      `https://api.crak.tech/v1/account/${username}/${tag}?fs=json`
-    ).then((response) => {
-      if (!response.ok) {
-        throw new Error("Name or Tag not valid");
-      }
-      return response.json();
+  const loadingDiv = document.getElementById("loading");
+  loadingDiv.style.display = "flex";
+
+  try {
+    const response = await fetch(`https://api.crak.tech/v1/account/${username}/${tag}?fs=json`);
+    if (!response.ok) {
+      throw new Error("Name or Tag not valid");
+    }
+    const data = await response.json();
+    loadingDiv.style.display = "none";
+
+    puuid = data.account.puuid;
+    region = data.account.region; 
+
+    const resultDiv = document.getElementById("results");
+    resultDiv.classList.add("text-center", "result-div");
+
+    createDataElement(resultDiv, "PUUID", puuid, `${puuid}`);
+    const regionMapping = {
+      'ap': 'Asia-Pacific[AP]',
+      'br': 'Brazil[BR]',
+      'eu': 'Europe[EU]',
+      'kr': 'Korea[KR]',
+      'latam': 'Latin America[LA]',
+      'na': 'North America[NA]'
+    };
+    const fullName = regionMapping[region] || region;
+    createDataElement(resultDiv, "Region", fullName, `${fullName}`);
+    createDataElement(resultDiv, "Win Loss API Endpoint", region, `wl/${region}/${puuid}`);
+
+    const endpoints = ["hs", "rr", "lb", "kd"];
+for (const endpoint of endpoints) {
+  try {
+    const endpointResponse = await fetch(`https://api.crak.tech/v1/${endpoint}/${region}/${puuid}?fs=json`);
+    if (!endpointResponse.ok) {
+      throw new Error(`Failed to fetch data from ${endpoint} endpoint`);
+    }
+    const endpointData = await endpointResponse.json();
+    Object.keys(endpointData).forEach((key) => {
+      createDataElement(resultDiv, `${endpoint.toUpperCase()} - ${key}`, endpointData[key], `${endpoint}/${region}/${puuid}`);
     });
+  } catch (error) {
+    console.error(`Error fetching data from ${endpoint} endpoint:`, error);
+  }
+}
 
-    const delayPromise = new Promise((resolve) => setTimeout(resolve, 5000));
-
-    Promise.all([fetchPromise, delayPromise])
-      .then(([data]) => {
-        loadingDiv.style.display = "none";
-
-        const puuid = data.account.puuid;
-        const region = data.account.region;
-
-        const resultDiv = document.getElementById("results");
-        resultDiv.classList.add("text-center", "result-div");
-
-        createDataElement(
-          resultDiv,
-          "PUUID",
-          puuid,
-          `${puuid}`
-        );
-        const regionMapping = {
-          'ap': 'Asia-Pacific[AP]',
-        };
-        
-        const fullName = regionMapping[region] || region;
-        
-        createDataElement(
-          resultDiv,
-          "Region",
-          fullName,
-          `${fullName}`
-        );
-
-        const endpoints = [
-          "hs",
-          "rr",
-          "lb",
-          "kd",
-        ];
-        createDataElement(
-          resultDiv,
-          "Win Loss API Endpoint",
-          region,
-          `wl/${region}/${puuid}`
-        );
-        endpoints.forEach((endpoint) => {
-          fetch(
-            `https://api.crak.tech/v1/${endpoint}/${region}/${puuid}?fs=json`
-          )
-            .then((response) => response.json())
-            .then((data) => {
-              Object.keys(data).forEach((key) => {
-                createDataElement(
-                  resultDiv,
-                  `${endpoint.toUpperCase()} - ${key}`,
-                  data[key],
-                  `${endpoint}/${region}/${puuid}`
-                );
-              });
-            })
-            .catch((error) => {
-              console.error("Error:", error);
-            });
-        });
-        document.getElementById("userForm").style.display = "none";
-        document.getElementById("Main").style.display = "none";
-        document.body.style.overflowX = "hidden";
-        document.body.style.overflowY = "scroll";
-      })
-      .catch((error) => {
-        loadingDiv.style.display = "none";
-        alert(error.message);
-      });
-  });
-
+    document.getElementById("userForm").style.display = "none";
+    document.getElementById("Main").style.display = "none";
+    document.body.style.overflowX = "hidden";
+    document.body.style.overflowY = "scroll";
+  } catch (error) {
+    loadingDiv.style.display = "none";
+    alert(error.message);
+  }
+});
 function createDataElement(parent, labelContent, dataContent, endpoint) {
   const dataDiv = document.createElement("div");
   dataDiv.classList.add("data-div", "d-flex", "flex-column", "mb-3");
