@@ -241,7 +241,8 @@ app.get('/v1/wl/:region/:puuid', (req, res) => {
 });
 app.patch('/v1/wl/:region/:puuid/reset_time', (req, res) => {
   const { region, puuid } = req.params;
-  if (!region || !puuid) {
+  const { reset_time } = req.body;
+  if (!region || !puuid || !reset_time) {
     return res.status(400).json({ message: 'Missing required parameters' });
   }
 
@@ -250,22 +251,15 @@ app.patch('/v1/wl/:region/:puuid/reset_time', (req, res) => {
     let row = stmt.get(puuid);
 
     if (row) {
-      let currentTime = new Date();
-      let resetTime = new Date(row.reset_time);
-
-      if (resetTime < currentTime) {
-        resetTime.setHours(resetTime.getHours() + 24);
-        let updateStmt = db.prepare(`UPDATE user_reset_time SET reset_time = ? WHERE puuid = ?`);
-        updateStmt.run(resetTime.toISOString(), puuid);
-      }
-
-      res.json({ message: 'Wins and losses reset successfully' });
+      let updateStmt = db.prepare(`UPDATE user_reset_time SET reset_time = ? WHERE puuid = ?`);
+      updateStmt.run(reset_time, puuid);
+      res.json({ message: 'Reset time updated successfully' });
     } else {
       res.status(404).json({ message: 'No user found for this puuid' });
     }
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ message: 'An error occurred while resetting wins and losses' });
+    res.status(500).json({ message: 'An error occurred while updating the reset time' });
   }
 });
 app.get('/v1/wl/:region/:puuid/reset_time', (req, res) => {

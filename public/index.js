@@ -122,12 +122,7 @@ document.getElementById('username').addEventListener('change', function() {
 document.getElementById('tag').addEventListener('change', function() {
   this.value = encodeURIComponent(this.value);
 });
-for (let i = 0; i < 24; i++) {
-  const option = document.createElement('option');
-  option.value = i;
-  option.text = `${i}:00`;
-  document.getElementById('resetTime').appendChild(option);
-}
+
 
 document.addEventListener('DOMContentLoaded', async () => {
   try {
@@ -135,6 +130,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const data = await response.json();
     const currentResetTime = new Date(data.reset_time).getUTCHours();
     document.getElementById('resetTime').value = currentResetTime;
+
+    // Populate the dropdown after the reset time is fetched
+    for (let i = 0; i < 24; i++) {
+      const option = document.createElement('option');
+      option.value = i;
+      option.text = `${i}:00`;
+      document.getElementById('resetTime').appendChild(option);
+    }
   } catch (error) {
     console.error('Error:', error);
   }
@@ -147,6 +150,7 @@ document.getElementById('resetTimeForm').addEventListener('submit', async (event
   const currentDate = new Date();
   currentDate.setUTCHours(resetTime, 0, 0, 0);
   const resetTimeISO = currentDate.toISOString();
+
 
   try {
     const response = await fetch(`https://api.crak.tech/v1/wl/${region}/${puuid}/reset_time`, {
