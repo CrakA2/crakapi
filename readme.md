@@ -82,8 +82,10 @@ Expected Response:
 - The headshot % of the player.
 
 
-
-
 ## Error Handling
 
 In case of an error, the API will respond with a status code of 500 and a message describing the error.
+
+## API Credits
+
+This project utilizes the [HenrikDev API](https://app.swaggerhub.com/apis-docs/Henrik-3/HenrikDev-API/3.0.0#/). Please refer to their documentation for more information.
