@@ -125,6 +125,10 @@ app.get('/v1/account/:name/:tag', async (req, res) => {
     }
 });
 
+app.get('/riot.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'riot.txt'));
+});
+
 async function fetchMMR(region, puuid) {
     const url = `https://api.henrikdev.xyz/valorant/v1/by-puuid/mmr/${region}/${puuid}`;
 
