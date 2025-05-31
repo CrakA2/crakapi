@@ -1,7 +1,7 @@
 # CrakAPI
 
 CrakAPI is a powerful API for fetching player data. 
-For a GUI version, please visit [api.crak.tech](https://api.crak.tech/).
+For a GUI version, please visit [api.crak.tech](https://api.crak.in/).
 
 ## API Endpoints
 
@@ -9,7 +9,7 @@ Here are the available API endpoints for direct GET requests:
 
 ### Win-Loss Tracker
 
-`https://api.crak.tech/v1/wl/:region/:puuid`
+`https://api.crak.in/v1/wl/:region/:puuid`
 
 This route fetches the overall win-loss data for a player. It uses the region and the unique identifier (puuid) of the player to query the database for the player's win-loss data. If the `fs=json` query parameter is provided, it returns the data in JSON format. Otherwise, it returns a string representation of the data.
 
@@ -25,7 +25,7 @@ Expected Response:
 
 ### Leaderboard
 
-`https://api.crak.tech/v1/lb/:region/:puuid`
+`https://api.crak.in/v1/lb/:region/:puuid`
 
 Fetches the leaderboard data for a player.
 
@@ -55,7 +55,7 @@ Expected Response:
 
 ### Account
 
-`https://api.crak.tech/v1/account/:name/:tag`
+`https://api.crak.in/v1/account/:name/:tag`
 
 Fetches the account data for a player.
 
@@ -70,7 +70,7 @@ Expected Response:
 
 ### Headshot
 
-`https://api.crak.tech/v1/headshot/:region/:puuid`
+`https://api.crak.in/v1/headshot/:region/:puuid`
 
 Fetches the headshot image for a player.
 
